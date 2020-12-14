@@ -1,92 +1,199 @@
-import TicTacToe from "./tic-tac-toe"
+import ConnectFour from "./connect-four"
 
-describe('Core TicTacToe tests', () => {
+describe('Core ConnectFour tests', () => {
   describe('Initialising', () => {
-    const game = new TicTacToe()
+    const game = new ConnectFour()
 
     it('Creates an empty board', () => {
       expect(game.getBoard()).toEqual([
-        ['', '', ''],
-        ['', '', ''],
-        ['', '', '']
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '']
       ])
     })
 
-    it('Starts with X as the turn player', () => {
-      expect(game.getTurnPlayer()).toBe('X')
+    it("Reports the game status correctly", () => {
+      expect(game.getStatus()).toEqual({
+        isComplete: false,
+        turnPlayer: 'X'
+      })
     })
 
-    it("Reports the game status as ongoing", () => {
-      expect(game.getStatus()).toBe("Ongoing - X's turn")
+    it("Can load a given board", () => {
+      game.loadBoard([
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', 'X', '', '', ''],
+        ['', '', 'O', 'X', '', '', ''],
+        ['', '', 'X', 'O', '', '', '']
+      ])
+      expect(game.getBoard()).toEqual([
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', 'X', '', '', ''],
+        ['', '', 'O', 'X', '', '', ''],
+        ['', '', 'X', 'O', '', '', '']
+      ])
+
+      expect(game.getStatus()).toBe({
+        isComplete: false,
+        turnPlayer: 'O'
+      })
     })
   })
 
   describe('Playing', () => {
-    const game = new TicTacToe()
+    const game = new ConnectFour()
     
-    it('Can add markers as specified', () => {
-      game.addMarker({ row: 2, col: 2 })
+    it('Can drop counters in given rows', () => {
+      game.dropCounter(2)
       expect(game.getBoard()).toEqual([
-        ['', '', ''],
-        ['', 'X', ''],
-        ['', '', '']
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', 'X', '', '', '', '', '']
+      ])
+    })
+
+    it("Plays an O on the second marker placed", () => {
+      game.dropCounter(2)
+      expect(game.getBoard()).toEqual([
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', 'O', '', '', '', '', ''],
+        ['', 'X', '', '', '', '', '']
       ])
     })
 
     it('Logs out a message when an occupied cell is attempted', () => {
       const consoleSpy = jest.spyOn(console, 'log')
-      game.addMarker({ row: 2, col: 2 })
-      expect(consoleSpy).toHaveBeenCalledWith("There's already a marker there - try placing somewhere else!");
-    })
-
-    it("Plays an O on the second marker placed", () => {
-      game.addMarker({ row: 3, col: 3 })
+      game.dropCounter(2)
+      game.dropCounter(2)
+      game.dropCounter(2)
+      game.dropCounter(2)
       expect(game.getBoard()).toEqual([
-        ['', '', ''],
-        ['', 'X', ''],
-        ['', '', 'O']
+        ['', 'O', '', '', '', '', ''],
+        ['', 'X', '', '', '', '', ''],
+        ['', 'O', '', '', '', '', ''],
+        ['', 'X', '', '', '', '', ''],
+        ['', 'O', '', '', '', '', ''],
+        ['', 'X', '', '', '', '', '']
       ])
+      expect(consoleSpy).not.toHaveBeenCalledWith("You can't place a counter in column 2 - it is full! Why don't you try somewhere else?")
+      game.dropCounter(2)
+      expect(consoleSpy).toHaveBeenCalledWith("You can't place a counter in column 2 - it is full! Why don't you try somewhere else?")
     })
 
-    it.skip('Prints a visual board', () => {
+    it('Logs out a message when an invalid column is provided', () => {
+      const consoleSpy = jest.spyOn(console, 'log')
+      game.dropCounter(10)
+      expect(consoleSpy).toHaveBeenCalledWith("You can't place a counter in column 10 - that's not a valid column in our board! Why don't you try somewhere else?")
+    })
+
+    it('Prints a visual board', () => {
       const consoleSpy = jest.spyOn(console, 'log')
       game.printBoard()
-      expect(consoleSpy).toHaveBeenCalledWith("| | | |\n| |X| |\n| | |O|")
+      expect(consoleSpy).toHaveBeenCalledWith("| |O| | | | | |\n| |X| | | | | |\n| |O| | | | | |\n| |X| | | | | |\n| |O| | | | | |\n| |X| | | | | |")
     })
   })
 
-  describe('Victory', () => {
+  describe('Game end', () => {
     it('Detects a first row win', () => {
-      const game = new TicTacToe()
-      game.addMarker({ row: 2, col: 2 })
-      game.addMarker({ row: 1, col: 1 })
-      game.addMarker({ row: 3, col: 1 })
-      game.addMarker({ row: 1, col: 2 })
-      game.addMarker({ row: 3, col: 3 })
-      game.addMarker({ row: 1, col: 3 })
+      const game = new ConnectFour()
+      game.dropCounter(2)
+      game.dropCounter(2)
+      game.dropCounter(3)
+      game.dropCounter(3)
+      game.dropCounter(4)
+      game.dropCounter(4)
+      game.dropCounter(5)
       expect(game.getBoard()).toEqual([
-        ['O', 'O', 'O'],
-        ['', 'X', ''],
-        ['X', '', 'X']
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', 'O', 'O', 'O', '', '', ''],
+        ['', 'X', 'X', 'X', 'X', '', '']
       ])
-      expect(game.getStatus()).toBe('Finished - O is the winner!')
+      expect(game.getStatus()).toEqual({
+        isComplete: true,
+        winner: 'X'
+      })
     })
 
-    // TODO: fix code so this test passes
-    it.skip('Detects a diagonal win', () => {
-      const game = new TicTacToe()
-      game.addMarker({ row: 2, col: 2 })
-      game.addMarker({ row: 1, col: 3 })
-      game.addMarker({ row: 3, col: 3 })
-      game.addMarker({ row: 1, col: 2 })
-      game.addMarker({ row: 1, col: 1 })
+    it('Detects a fourth column win', () => {
+      const game = new ConnectFour()
+      game.dropCounter(2)
+      game.dropCounter(4)
+      game.dropCounter(3)
+      game.dropCounter(4)
+      game.dropCounter(3)
+      game.dropCounter(4)
+      game.dropCounter(3)
+      game.dropCounter(4)
       expect(game.getBoard()).toEqual([
-        ['X', 'O', 'O'],
-        ['', 'X', ''],
-        ['', '', 'X']
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', 'O', '', '', ''],
+        ['', '', 'X', 'O', '', '', ''],
+        ['', '', 'X', 'O', '', '', ''],
+        ['', 'X', 'X', 'O', '', '', '']
       ])
-      expect(game.getStatus()).toBe('Finished - X is the winner!')
+      expect(game.getStatus()).toEqual({
+        isComplete: true,
+        winner: 'O'
+      })
     })
 
+    it('Detects a diagonal win', () => {
+      const game = new ConnectFour()
+      game.dropCounter(2)
+      game.dropCounter(3)
+      game.dropCounter(3)
+      game.dropCounter(4)
+      game.dropCounter(5)
+      game.dropCounter(4)
+      game.dropCounter(4)
+      game.dropCounter(5)
+      game.dropCounter(3)
+      game.dropCounter(5)
+      game.dropCounter(5)
+      expect(game.getBoard()).toEqual([
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', 'X', '', ''],
+        ['', '', 'X', 'X', 'O', '', ''],
+        ['', '', 'X', 'O', 'O', '', ''],
+        ['', 'X', 'O', 'O', 'X', '', '']
+      ])
+      expect(game.getStatus()).toEqual({
+        isComplete: true,
+        winner: 'X'
+      })
+    })
+
+    it('Announces no winner or turn player in a draw', () => {
+      const game = new ConnectFour()
+      game.loadBoard([
+        ['O', 'O', 'X', 'X', 'O', 'O', 'X'],
+        ['X', 'X', 'O', 'O', 'X', 'X', 'O'],
+        ['O', 'O', 'X', 'X', 'O', 'O', 'X'],
+        ['X', 'X', 'O', 'O', 'X', 'X', 'O'],
+        ['O', 'O', 'X', 'X', 'O', 'O', 'X'],
+        ['X', 'X', 'O', 'O', 'X', 'X', 'O']
+      ])
+      expect(game.getStatus()).toEqual({
+        isComplete: true
+      })
+    })
   })
 })
