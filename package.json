@@ -1,5 +1,5 @@
 {
-  "name": "mark-oop-proj--tic-tac-toe",
+  "name": "mark-oop-proj--connect-four",
   "version": "1.0.0",
   "scripts": {
     "test": "jest --watch"
