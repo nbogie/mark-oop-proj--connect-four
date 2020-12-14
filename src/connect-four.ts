@@ -87,26 +87,32 @@ class ConnectFour implements IConnectFour {
     const cellMatchesO = (pos) => cellMatches("O", pos);
     const cellMatches = (marker: Marker, [rowNum, colNum]) => this.readCell(rowNum, colNum) === marker;
 
-    const horizWinPositions = collectFromTo(1, 6,
+    const horizWinLines = collectFromTo(1, 6,
       (rowNum) => collectFromTo(1, 4,
         (startColNum) => collectFromTo(startColNum, startColNum + 3,
           (colNum) => [rowNum, colNum]))).flat()
 
-    const vertWinPositions = collectFromTo(1, 7,
+    const vertWinLines = collectFromTo(1, 7,
       (colNum) => collectFromTo(1, 3,
         (startRowNum) => collectFromTo(startRowNum, startRowNum + 3,
           (rowNum) => [rowNum, colNum]))).flat()
 
-    const slashWinPositions = collectFromTo(4, 6, startRowNum => collectFromTo(1, 4, startColNum => collectFromTo(0, 3, (offset => [startRowNum - offset, startColNum + offset])))).flat()
-    const backslashWinPositions = collectFromTo(1, 3, startRowNum => collectFromTo(1, 4, startColNum => collectFromTo(0, 3, (offset => [startRowNum + offset, startColNum + offset])))).flat()
+    // these diagonals /
+    const slashWinLines = collectFromTo(4, 6, startRowNum => collectFromTo(1, 4, startColNum => collectFromTo(0, 3, (offset => [startRowNum - offset, startColNum + offset])))).flat()
 
-    const possibleWinPositions = [...horizWinPositions, ...vertWinPositions, ...slashWinPositions, ...backslashWinPositions];
+    // these diagonals \
+    const backslashWinLines = collectFromTo(1, 3, startRowNum => collectFromTo(1, 4, startColNum => collectFromTo(0, 3, (offset => [startRowNum + offset, startColNum + offset])))).flat()
+
+    const allPossibleWinLines = [...horizWinLines, ...vertWinLines, ...slashWinLines, ...backslashWinLines];
 
     //TODO: rewrite so we don't need two separate check fns
-    const foundWinPositions: number[][] = possibleWinPositions.find(posns => posns.every(cellMatchesX) || posns.every(cellMatchesO))
+    const foundWinLines: number[][] = allPossibleWinLines.find(posns => posns.every(cellMatchesX) || posns.every(cellMatchesO))
 
-    //TODO: horrors. try writing so that the typechecker knows we have a tuple and then a marker!  Don't use `as`.
-    return foundWinPositions ? (this.readCell(...foundWinPositions[0] as [number, number]) as Marker) : undefined;
+    if (!foundWinLines) {
+      return undefined;
+    }
+    //TODO: horrors. try writing so that the typechecker *knows* we have a tuple, and then a marker!  Don't use `as`.
+    return this.readCell(...foundWinLines[0] as [number, number]) as Marker;
   }
 
   getStatus(): GameStatus {
