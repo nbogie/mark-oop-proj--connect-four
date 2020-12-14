@@ -40,7 +40,7 @@ describe('Core ConnectFour tests', () => {
         ['', '', 'X', 'O', '', '', '']
       ])
 
-      expect(game.getStatus()).toBe({
+      expect(game.getStatus()).toEqual({
         isComplete: false,
         turnPlayer: 'O'
       })
@@ -49,7 +49,12 @@ describe('Core ConnectFour tests', () => {
 
   describe('Playing', () => {
     const game = new ConnectFour()
-    
+
+    it("Can read cells counting from 1 for row and col", () => {
+      expect(game.readCell(6, 2)).toBe("");
+      expect(ConnectFour.isCellEmpty(game.readCell(6, 2))).toBe(true);
+    })
+
     it('Can drop counters in given rows', () => {
       game.dropCounter(2)
       expect(game.getBoard()).toEqual([
